@@ -1,0 +1,122 @@
+import pandas as pd
+import os
+
+# Load the datasets
+df1 = pd.read_csv(os.path.join(os.path.expanduser('~'), 'Downloads', 'dataset1.csv'))
+df2 = pd.read_csv(os.path.join(os.path.expanduser('~'), 'Downloads', 'dataset2.csv'))
+df3 = pd.read_csv(os.path.join(os.path.expanduser('~'), 'Downloads', 'dataset3.csv'))
+output_file_path = os.path.join(os.path.expanduser('~'), 'Downloads', 'comparison_summary.txt')
+
+# Merge datasets on 'ID' column
+df_merged = pd.merge(df1, df2, on='ID', how='inner')
+df_merged = pd.merge(df_merged, df3, on='ID', how='inner')
+
+# Print column names for debugging
+print("Columns in df_merged:")
+print(df_merged.columns)
+
+# Define columns for analysis
+screen_time_cols = ['C_we', 'C_wk', 'G_we', 'G_wk', 'S_we', 'S_wk', 'T_we', 'T_wk']
+wellbeing_cols = ['Optm', 'Usef', 'Relx', 'Intp', 'Engs', 'Dealpr', 'Thkclr', 'Goodme', 
+                  'Clsep', 'Conf', 'Mkmind', 'Loved', 'Intthg', 'Cheer']
+
+# Check which wellbeing columns are present
+missing_cols = [col for col in wellbeing_cols if col not in df_merged.columns]
+print("Missing columns:", missing_cols)
+
+# Adjust wellbeing_cols to only include existing columns
+wellbeing_cols = [col for col in wellbeing_cols if col in df_merged.columns]
+
+# Perform descriptive analysis
+screen_time_summary = df_merged[screen_time_cols].describe()
+wellbeing_summary = df_merged[wellbeing_cols].describe()
+
+# Group by gender and calculate the mean
+gender_grouped_screen_time = df_merged.groupby('gender')[screen_time_cols].mean()
+gender_grouped_wellbeing = df_merged.groupby('gender')[wellbeing_cols].mean()
+
+
+with open(output_file_path, 'w') as file:
+    # Add a title for the file
+    file.write("Comparison Summary Report\n")
+    file.write("="*50 + "\n\n")
+    
+    # Section 1: Screen Time Summary
+    file.write("1. Screen Time Summary\n")
+    file.write("   (Categories: C_we, C_wk, G_we, G_wk, S_we, S_wk, T_we, T_wk)\n")
+    file.write("-" * 50 + "\n")
+    file.write("This section presents a summary of the screen time data for different categories:\n")
+    file.write("C (Communication), G (Gaming), S (Social Media), T (Television)\n\n")
+    file.write(screen_time_summary.to_string())
+    file.write("\n\n")
+
+    # Add a separator between sections
+    file.write("=" * 50 + "\n\n")
+
+    # Section 2: Well-being Scores Summary
+    file.write("2. Well-being Scores Summary\n")
+    file.write("   (Categories: Optm, Usef, Relx, Intp, Engs, Dealpr, Thcklr, Goodme, Clsep, Conf, Mkmind, Loved, Intthg, Cheer)\n")
+    file.write("-" * 50 + "\n")
+    file.write("This section presents a summary of well-being scores across various emotional and psychological dimensions.\n\n")
+    file.write(wellbeing_summary.to_string())
+    file.write("\n\n")
+
+    # Add a separator between sections
+    file.write("=" * 50 + "\n\n")
+
+    # Section 3: Average Screen Time by Gender
+    file.write("3. Average Screen Time by Gender\n")
+    file.write("-" * 50 + "\n")
+    file.write("This section presents the average screen time comparison between different genders.\n\n")
+    file.write(gender_grouped_screen_time.to_string())
+    file.write("\n\n")
+
+    # Add a separator between sections
+    file.write("=" * 50 + "\n\n")
+
+    # Section 4: Average Well-being Scores by Gender
+    file.write("4. Average Well-being Scores by Gender\n")
+    file.write("-" * 50 + "\n")
+    file.write("This section compares the average well-being scores between different genders.\n\n")
+    file.write(gender_grouped_wellbeing.to_string())
+    file.write("\n\n")
+
+    # Final separator and conclusion
+    file.write("=" * 50 + "\n")
+    file.write("End of Report\n")
+    file.write("=" * 50 + "\n")
+
+# Print a message confirming that the file has been saved
+print(f"Organized comparison results saved to {output_file_path}")
+
+
+
+
+
+
+# Visualization Example
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Group by gender to analyze screen time differences
+gender_screen_time = merged_data.groupby('gender')[['C_wk', 'C_we', 'G_wk', 'G_we', 'S_wk', 'S_we', 'T_wk', 'T_we']].mean()
+
+# Plotting
+gender_screen_time.plot(kind='bar', figsize=(10, 6), title="Average Screen Time by Gender")
+plt.ylabel("Average Hours")
+plt.xticks(rotation=0)
+plt.show()
+
+
+#(Correlation Matrix):
+
+import pandas as pd
+
+# Load datasets
+demographics = pd.read_csv('dataset1.csv')
+screen_time = pd.read_csv('dataset2.csv')
+wellbeing = pd.read_csv('dataset3.csv')
+
+# Merge datasets on the ID
+merged_data = demographics.merge(screen_time, on='ID').merge(wellbeing, on='ID')
